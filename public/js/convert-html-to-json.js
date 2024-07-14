@@ -86,21 +86,11 @@ function commonReplace(text) {
     text = text.replaceAll('\n', '<br>');
     text = text.replaceAll('src="assets/media', 'src="https://examtopics.com/assets/media');
     text = text.replaceAll('<br>Most Voted<br>', '');
-
-    text = text.replaceAll('A.', 'A. ');
-    text = text.replaceAll('B.', 'B. ');
-    text = text.replaceAll('C.', 'C. ');
-    text = text.replaceAll('D.', 'D. ');
-    text = text.replaceAll('E.', 'E. ');
-    text = text.replaceAll('F.', 'F. ');
-
-    text = text.replaceAll('<br>A.', 'A.');
-    text = text.replaceAll('<br>B.', 'B.');
-    text = text.replaceAll('<br>C.', 'C.');
-    text = text.replaceAll('<br>D.', 'D.');
-    text = text.replaceAll('<br>E.', 'E.');
-    text = text.replaceAll('<br>F.', 'F.');
-
+    text = text.replaceAll('=09 ', '');
+    text = text.replaceAll('=09', '');
+    text = text.replaceAll('=E2=80=9C', '\'');
+    text = text.replaceAll('=E2=80=9D', '\' ');
+    text = text.replaceAll('<br><br><br> ', '');
     return text;
 }
 
@@ -126,6 +116,13 @@ function convert(html) {
     // Question
     var questionBody = $("#tempHtml .question-body > p.card-text:first-child").html();
     questionBody = commonReplace(questionBody);
+    questionBody = questionBody.replaceAll('Ximg', '<img class=\\"w-100\\"');
+    if (questionBody.indexOf("<br><br>") == 0) {
+      questionBody = questionBody.slice("<br><br>".length);
+    }
+    if (questionBody.lastIndexOf("<br><br>") == questionBody.length - "<br><br>".length) {
+        questionBody = questionBody.slice(0, questionBody.lastIndexOf("<br><br>"));
+    }
 
     // Answers
     var questionChoicesHtml = $("#tempHtml .question-body .question-choices-container ul li");
@@ -133,6 +130,17 @@ function convert(html) {
     questionChoicesHtml.each((key, questionChoice) => {
         questionChoiceText = questionChoice.innerText;
         questionChoiceText = commonReplace(questionChoiceText);
+        if (questionChoiceText.indexOf("A.") == 0 
+        || questionChoiceText.indexOf("B.") == 0 
+        || questionChoiceText.indexOf("C.") == 0
+        || questionChoiceText.indexOf("D.") == 0
+        || questionChoiceText.indexOf("E.") == 0
+        || questionChoiceText.indexOf("F.") == 0
+        || questionChoiceText.indexOf("G.") == 0
+        ) {
+            questionChoiceText = questionChoiceText.slice(2);
+        }
+        questionChoiceText = questionChoiceText.replaceAll('Ximg', '<img class=\\"w-100\\"');
         questionChoices.push(questionChoiceText);
     });
     
@@ -162,7 +170,7 @@ function convert(html) {
             if(sub_commnent != "") {
                 content += `\n <div>\tReplies:</div> <ul style='list-style-type: disclosure-closed;'>${sub_commnent}</ul>`
             }
-            username = username.replaceAll('  ', '').replaceAll('\n', '');
+            username = username.replaceAll('  ', '').replaceAll('\n', '').replaceAll('\t', '');
             content = commonReplace(content);
             
             let comment = {
@@ -243,6 +251,7 @@ function splitQuestionRawFreeCam(htmlRaw) {
 $("#btn-submit-json").on("click", function () {
     $("#csv-result").text("");
     var htmlRaw = $("#html-source").val();
+    htmlRaw = htmlRaw.replace(/<img/g, 'Ximg')
     var listQuestionRawHtml = splitQuestionRaw(htmlRaw);
 
     var csvText = "";
